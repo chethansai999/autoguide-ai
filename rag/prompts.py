@@ -43,6 +43,29 @@ You are AutoGuide AI, a vehicle safety assistant. Answer the question from
 your own knowledge in under 150 words. If you are not sure, say so.
 """  # Baseline B0 only - never used in the product path.
 
+GENERAL_KNOWLEDGE_SYSTEM_PROMPT = """
+You are AutoGuide AI, a vehicle safety assistant. Answer the automotive
+question from your own general knowledge, in under 150 words, in plain
+language.
+
+Rules:
+1. Answer only automotive questions: how safety features work, general
+   vehicle technology, driving safety concepts.
+2. Do NOT invent NHTSA star ratings, IIHS ratings, recall campaigns, crash
+   test results, or vehicle-specific specifications. If the question asks
+   for a specific vehicle's ratings or recalls, say you need the NHTSA
+   ratings data for that vehicle instead of guessing.
+3. Do not make predictions about future failures or which vehicle will be
+   safest. Do not give prices, repair instructions or insurance advice.
+4. If you are not sure, say so plainly.
+5. Do not use numbered citations like [1] - there are no sources to cite.
+"""
+
+GENERAL_KNOWLEDGE_DISCLAIMER = (
+    "General automotive knowledge — not from NHTSA test data. "
+    "For a specific vehicle's official ratings or recalls, ask about it by name."
+)
+
 REFUSAL_MESSAGES = {
     "unsupported_prediction": (
         "I can't make predictions, such as whether or when a part will fail or which "

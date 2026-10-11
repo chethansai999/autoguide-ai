@@ -362,10 +362,9 @@ def render_chat():
         if DEMO:
             st.info('Demo mode: no LLM API key configured, so answers are extractive placeholders. Retrieval, clarification and citations are real.')
         if not INDEX_READY:
-            st.warning('Article library is not loaded in this demo, so general "how does it work?" questions '
-                       'cannot be answered from articles yet. Vehicle ratings, safety-feature lookups, '
-                       'comparisons and recalls work fully — try asking about a specific vehicle below, '
-                       'or open Vehicle Lookup in the sidebar.')
+            st.info('Article library is not loaded in this deployment, so "how does it work?" questions are '
+                    'answered from general automotive knowledge (marked as such) rather than from articles. '
+                    'Vehicle ratings, safety-feature lookups, comparisons and recalls use NHTSA data with citations.')
         if not st.session_state.messages:
             with st.chat_message('assistant',avatar='🚘'):
                 st.markdown('**Welcome to AutoGuide AI.** Ask about vehicle safety, history, specifications or fuel economy, or choose a topic above.')
@@ -583,9 +582,9 @@ def render_features():
     st.title('Safety Features Explorer')
     st.caption('What each technology does, how common it is in the NHTSA ratings data, and a shortcut to ask the assistant about it.')
     if not INDEX_READY:
-        st.info('Article explanations are not loaded in this demo, so "Ask how it works" questions get an honest '
-                'notice in the chat instead of an article answer. The availability counts below are live from the '
-                '17,313-vehicle NHTSA ratings data and always work.')
+        st.info('"Ask how it works" questions are answered from general automotive knowledge in the chat '
+                '(marked as such) since the article library is not loaded. The availability counts below '
+                'are live from the 17,313-vehicle NHTSA ratings data and always work.')
     stats = feature_stats()
     total = stats.get('total', 0)
     keys = list(FEATURES.keys())

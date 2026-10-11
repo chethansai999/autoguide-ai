@@ -53,7 +53,7 @@ from db.models import ChatSession, Message, TurnTrace
 from db.session import get_sessionmaker, init_db
 from rag.evidence import EvidenceChecker
 from rag.generation import GroundedGenerator
-from rag.prompts import REFUSAL_MESSAGES, smalltalk_reply
+from rag.prompts import GENERAL_KNOWLEDGE_DISCLAIMER, REFUSAL_MESSAGES, smalltalk_reply
 from structured.recalls import RecallsTool
 from structured.resolver import VehicleResolver
 from structured.safercar import vehicle_evidence
@@ -328,11 +328,41 @@ class ChatService:
                 "threshold": check.get("threshold"),
             }
             if not check["sufficient"]:
+                if check["reason"] == "index_unavailable" and self._real_llm_available():
+                    return self._answer_general_knowledge(chat, question, history, trace, timer)
                 return self._refuse(chat, check["reason"], trace)
             evidence = self._chunk_evidence(check["evidence"])
 
         chat.last_intent, chat.last_features = intent.value, features
         return self._generate_answer(chat, message, question, intent, evidence, history, trace, timer)
+
+    def _real_llm_available(self) -> bool:
+        """True when a real generation provider is configured.
+
+        The general-knowledge fallback needs an actual LLM; with the mock
+        provider the honest refusal stays, since mock text is a placeholder,
+        not an answer.
+        """
+        return self.settings.resolved_llm_provider() != "mock"
+
+    def _answer_general_knowledge(self, chat, question, history, trace, timer) -> ChatResponse:
+        """Answer an automotive question from the LLM's own knowledge.
+
+        Reached only when the article index is unavailable AND a real LLM
+        provider is configured. Predictions, off-topic questions and prompt
+        injections are refused earlier in handle(), and the system prompt
+        forbids inventing vehicle-specific ratings/recalls/specs, so this
+        path cannot fabricate NHTSA data. The disclaimer marks the answer
+        as general knowledge, never NHTSA-sourced.
+        """
+        with timer.stage("generation"):
+            generated = self.generator.generate_general_knowledge(question, history)
+        trace.llm = generated.llm.as_trace()
+        trace.guard_flags += generated.flags
+        return self._reply(
+            chat, TurnStatus.ANSWERED, generated.text, trace,
+            disclaimer=GENERAL_KNOWLEDGE_DISCLAIMER,
+        )
 
     def _generate_answer(self, chat, message, question, intent, evidence, history, trace, timer) -> ChatResponse:
         trace.evidence = [{"ref": e.ref, "id": e.evidence_id, "kind": e.kind, "title": e.title,

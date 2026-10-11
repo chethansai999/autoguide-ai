@@ -18,7 +18,12 @@ from agent.lexicon import find_features
 from core.config import get_settings
 from core.llm import LLMClient, LLMResult, get_llm, is_connection_error
 from core.schemas import Evidence
-from rag.prompts import CLOSED_BOOK_SYSTEM_PROMPT, LLM_UNREACHABLE_NOTE, SYSTEM_PROMPT
+from rag.prompts import (
+    CLOSED_BOOK_SYSTEM_PROMPT,
+    GENERAL_KNOWLEDGE_SYSTEM_PROMPT,
+    LLM_UNREACHABLE_NOTE,
+    SYSTEM_PROMPT,
+)
 
 log = logging.getLogger(__name__)
 FALLBACK_FLAG = "llm_unreachable_extractive_fallback"
@@ -206,6 +211,30 @@ class GroundedGenerator:
             quote_trimmed=trimmed,
             llm=result,
             flags=flags,
+        )
+
+    def generate_general_knowledge(
+        self, question: str, history: list[dict] | None = None
+    ) -> GeneratedAnswer:
+        """Answer an automotive question from the LLM's own knowledge.
+
+        Used only when the article index is unavailable (no chunks loaded)
+        and a real LLM provider is configured. The system prompt forbids
+        inventing vehicle-specific ratings, recalls or specs, and forbids
+        numbered citations since there is no evidence to cite. The caller
+        must attach GENERAL_KNOWLEDGE_DISCLAIMER so the answer is never
+        mistaken for NHTSA-sourced data.
+        """
+        messages = [*history_messages(history), {"role": "user", "content": question}]
+        result = self.llm.complete(GENERAL_KNOWLEDGE_SYSTEM_PROMPT, messages)
+        return GeneratedAnswer(
+            text=result.text,
+            valid_citations=True,  # nothing cited, nothing to validate
+            cited_refs=set(),
+            invalid_refs=set(),
+            quote_trimmed=False,
+            llm=result,
+            flags=["general_knowledge_no_sources"],
         )
 
     def generate_closed_book(self, question: str) -> GeneratedAnswer:
