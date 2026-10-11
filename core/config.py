@@ -72,8 +72,9 @@ class Settings(BaseSettings):
     # -------------------------------------------------------------------- llm
     # "auto" -> openai if OPENAI_API_KEY is set, else anthropic if
     # ANTHROPIC_API_KEY is set, else gemini if GEMINI_API_KEY is set, else
-    # mock (deterministic, offline).
-    llm_provider: Literal["auto", "openai", "anthropic", "gemini", "mock"] = "auto"
+    # mock (deterministic, offline). "ollama" is always explicit: it runs a
+    # local Llama through an Ollama server (no API key needed).
+    llm_provider: Literal["auto", "openai", "anthropic", "gemini", "ollama", "mock"] = "auto"
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
     anthropic_api_key: str | None = None
@@ -83,6 +84,10 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.8-flash"
     gemini_api_base: str = "https://generativelanguage.googleapis.com/v1beta"
+    # Local Llama via Ollama (no API key). Set LLM_PROVIDER=ollama and make
+    # sure `ollama serve` is running with the model pulled (ollama pull ...).
+    ollama_api_base: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2"
     llm_temperature: float = 0.0
     llm_max_tokens: int = 700
     llm_timeout_s: float = 30.0

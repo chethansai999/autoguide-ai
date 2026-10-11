@@ -9,6 +9,7 @@ for the cost-per-query metric.
     LLM_PROVIDER=openai    OPENAI_API_KEY=...  OPENAI_MODEL=gpt-4o-mini
     LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=... ANTHROPIC_MODEL=...
     LLM_PROVIDER=gemini    GEMINI_API_KEY=...    GEMINI_MODEL=gemini-3.8-flash
+    LLM_PROVIDER=ollama    OLLAMA_MODEL=llama3.2   # local Llama, no key
     LLM_PROVIDER=mock      # deterministic extractive answers, no network
 """
 
@@ -294,6 +295,82 @@ class GeminiClient:
         )
 
 
+class OllamaAPIError(RuntimeError):
+    """An error the Ollama server returned (unknown model, bad request...).
+
+    Carries ``status_code`` so is_connection_error() never treats it as a
+    network failure: provider errors must stay visible.
+    """
+
+    def __init__(self, status_code: int, message: str):
+        super().__init__(f"Ollama API {status_code}: {message}")
+        self.status_code = status_code
+
+
+class OllamaClient:
+    """Local Llama through an Ollama server (no API key needed).
+
+    POSTs to the native ``/api/chat`` endpoint. Only httpx is needed.
+    Start the server first: ``ollama serve`` and ``ollama pull <model>``.
+    """
+
+    provider = "ollama"
+
+    def __init__(self, settings: Settings, transport=None):
+        import httpx
+
+        self.settings = settings
+        self.model = settings.ollama_model
+        self.base = settings.ollama_api_base.rstrip("/")
+        self.host = httpx.URL(self.base).host
+        self.http = httpx.Client(
+            timeout=_timeout(settings),
+            transport=transport or httpx.HTTPTransport(retries=settings.llm_max_retries),
+            headers={"content-type": "application/json"},
+        )
+
+    def complete(self, system, messages, *, temperature=None, max_tokens=None, json_mode=False):
+        start = time.perf_counter()
+        chat_messages = [{"role": "system", "content": system}, *messages]
+        if json_mode:
+            chat_messages[0]["content"] = (
+                chat_messages[0]["content"]
+                + "\n\nRespond with a single JSON object and nothing else."
+            )
+        body = {
+            "model": self.model,
+            "messages": chat_messages,
+            "stream": False,
+            "options": {
+                "temperature": self.settings.llm_temperature if temperature is None else temperature,
+                "num_predict": max_tokens or self.settings.llm_max_tokens,
+            },
+        }
+        with _network_guard(self.host):
+            response = self.http.post(f"{self.base}/api/chat", json=body)
+        if response.status_code >= 400:
+            try:
+                message = response.json().get("error", "")
+            except ValueError:
+                message = response.text
+            raise OllamaAPIError(response.status_code, " ".join(str(message).split())[:300])
+        data = response.json()
+        text = ((data.get("message") or {}).get("content") or "").strip()
+        if not text:
+            raise OllamaAPIError(200, "empty answer from Ollama")
+        prompt_tokens = int(data.get("prompt_eval_count") or 0)
+        completion_tokens = int(data.get("eval_count") or 0)
+        return LLMResult(
+            text=text,
+            provider=self.provider,
+            model=self.model,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            latency_ms=(time.perf_counter() - start) * 1000,
+            cost_usd=0.0,  # local inference has no per-token charge
+        )
+
+
 _EVIDENCE_BLOCK = re.compile(
     r"Evidence \[(\d+)\].*?Content:\s*(.*?)(?=\n<<<END EVIDENCE|\Z)", re.S
 )
@@ -362,6 +439,8 @@ def build_llm(settings: Settings | None = None) -> LLMClient:
         return AnthropicClient(settings)
     if provider == "gemini":
         return GeminiClient(settings)
+    if provider == "ollama":
+        return OllamaClient(settings)
     log.warning("LLM provider is 'mock': answers are extractive placeholders.")
     return MockLLM()
 

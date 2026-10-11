@@ -100,7 +100,8 @@ def inspect_readiness(service: ChatService) -> dict:
           f"The vector collection must match the chunk file; rebuild: python ingest.py index --strategy {settings.chunk_strategy}")
 
     key = (getattr(settings, f"{provider}_api_key", None) or "").strip()
-    check("generation_configured", provider != "mock" and key not in PLACEHOLDER_KEYS,
+    key_needed = provider != "ollama"  # local Llama via Ollama needs no API key
+    check("generation_configured", provider != "mock" and (not key_needed or key not in PLACEHOLDER_KEYS),
           "Configure a supported LLM provider and its API key in .env; mock output is for development only.")
     check("semantic_embeddings", settings.embedding_backend != "hashing",
           "Use sentence-transformers embeddings for a real deployment; hashing is for offline tests.")
