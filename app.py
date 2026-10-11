@@ -99,28 +99,42 @@ INDEX_READY = bool(_STATUS and _STATUS.get('checks', {}).get('vector_index'))
 st.markdown('''
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-.stApp {background:#f3f6fb;color:#172a46;font-family:Inter,Arial,sans-serif}
-[data-testid="stMainBlockContainer"] {max-width:1540px;padding:1.4rem 2rem 4rem}
-[data-testid="stSidebar"] {background:#0b1c38;border-right:1px solid #29415f}
-[data-testid="stSidebar"] .stMarkdown, [data-testid="stSidebar"] p,
-[data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2 {color:#e8f0ff!important}
-[data-testid="stSidebar"] button {border:1px solid #3f5577!important;background:#192f52!important;color:#fff!important}
-.hero-copy {background:linear-gradient(115deg,#fff,#eaf2ff);border:1px solid #e2eaf4;border-radius:17px;padding:30px;min-height:260px}
-.hero-copy .eyebrow{color:#4269a6;font-size:12px;letter-spacing:1.3px;font-weight:800}
-.hero-copy h1 {color:#142d51;font-size:46px;line-height:1.07;margin:16px 0 12px;font-weight:800}
-.hero-copy h1 span {color:#1769e4}
-.hero-copy p {font-size:15px;color:#526883;line-height:1.7;max-width:560px}
-.surface {background:#fff;border:1px solid #e0e7f1;border-radius:14px;padding:18px;margin:8px 0 18px;box-shadow:0 3px 12px rgba(18,45,85,.035)}
-.topic {min-height:92px;border-radius:0 0 12px 12px;padding:13px 12px;background:white;border:1px solid #e3ebf7;border-top:0;margin-top:-5px}
-.topic strong{font-size:13px;color:#153254}
-.topic small{display:block;font-size:11px;color:#667992;line-height:1.6;padding-top:6px}
-.sec-title{font-size:21px;color:#172d4b;font-weight:800;margin:12px 0 8px}
-.subtle {font-size:12px;color:#72829a}
-[data-testid="stChatMessage"]{border:1px solid #e1e8f1;border-radius:13px;background:white;padding:8px}
-[data-testid="stMetric"]{background:#f8fbff;border:1px solid #e8eef6;border-radius:11px;padding:11px}
-.stButton>button{border-radius:9px;border:1px solid #d5e1f1;font-weight:650}
-[data-testid="stImage"] img{border-radius:12px 12px 0 0} .topic small{min-height:40px} .stApp{background:#f4f7fb} .sec-title{font-size:22px} [data-testid="stSidebar"]{background:#071c37} .hero-copy{background:linear-gradient(120deg,#fdfdff,#ecf4ff)}
-@media(max-width:900px){.hero-copy h1{font-size:32px}.hero-copy{min-height:0;padding:20px}}
+:root{--ink:#101f38;--ink-soft:#4c6079;--brand:#1769e4;--brand-deep:#0d47b8;--line:#e3ebf6;--card:#ffffff;--wash:#f4f7fc}
+.stApp{background:radial-gradient(1200px 500px at 85% -5%,#e8f1ff 0%,transparent 60%),var(--wash);color:var(--ink);font-family:Inter,Arial,sans-serif}
+[data-testid="stMainBlockContainer"]{max-width:1540px;padding:1.5rem 2.2rem 4.5rem}
+/* ---- sidebar ---- */
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#0a1a35 0%,#0b2144 100%);border-right:1px solid rgba(120,150,200,.25)}
+[data-testid="stSidebar"] .stMarkdown,[data-testid="stSidebar"] p,[data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2{color:#e9f1ff!important}
+[data-testid="stSidebar"] button{border:1px solid rgba(150,175,220,.28)!important;background:rgba(255,255,255,.06)!important;color:#f2f7ff!important;border-radius:10px;font-weight:600;transition:background .15s ease,transform .15s ease}
+[data-testid="stSidebar"] button:hover{background:rgba(255,255,255,.14)!important;transform:translateY(-1px)}
+[data-testid="stDownloadButton"] button{border-radius:10px}
+/* ---- hero ---- */
+.hero-copy{background:linear-gradient(118deg,#ffffff 20%,#e9f2ff 70%,#dceaff 100%);border:1px solid #e0e9f7;border-radius:20px;padding:34px 34px 30px;min-height:260px;box-shadow:0 10px 30px rgba(23,105,228,.08)}
+.hero-copy .eyebrow{color:var(--brand);font-size:12px;letter-spacing:2.2px;font-weight:800}
+.hero-copy h1{color:#0f2547;font-size:48px;line-height:1.05;margin:16px 0 12px;font-weight:800;letter-spacing:-.5px}
+.hero-copy h1 span{background:linear-gradient(90deg,var(--brand),#5b9dff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-copy p{font-size:15px;color:var(--ink-soft);line-height:1.7;max-width:580px}
+.hero-copy .pill-row{margin-top:14px}
+/* ---- cards ---- */
+.surface{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin:10px 0 20px;box-shadow:0 4px 16px rgba(16,42,80,.05)}
+.topic{min-height:96px;border-radius:0 0 14px 14px;padding:14px 13px;background:#fff;border:1px solid var(--line);border-top:0;margin-top:-6px}
+.topic strong{font-size:13.5px;color:#0f2547}
+.topic small{display:block;font-size:11.5px;color:#667992;line-height:1.65;padding-top:6px;min-height:42px}
+.sec-title{font-size:22px;color:#0f2547;font-weight:800;margin:14px 0 10px;letter-spacing:-.3px}
+.subtle{font-size:12px;color:#7b8ba3}
+/* ---- chat ---- */
+[data-testid="stChatMessage"]{border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px 14px;box-shadow:0 2px 10px rgba(16,42,80,.04)}
+[data-testid="stChatInput"]{border-radius:14px}
+/* ---- metrics & buttons ---- */
+[data-testid="stMetric"]{background:linear-gradient(180deg,#ffffff,#f7faff);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 2px 8px rgba(16,42,80,.04)}
+[data-testid="stMetric"] [data-testid="stMetricValue"]{color:#0f2547;font-weight:800}
+.stButton>button{border-radius:10px;border:1px solid #d5e1f1;font-weight:650;transition:box-shadow .15s ease,transform .15s ease}
+.stButton>button:hover{box-shadow:0 4px 14px rgba(23,105,228,.15);transform:translateY(-1px)}
+[data-testid="stImage"] img{border-radius:14px 14px 0 0}
+[data-testid="stExpander"]{border:1px solid var(--line);border-radius:12px;background:#fff}
+[data-testid="stDataFrame"]{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stSelectbox>div>div{border-radius:10px}
+@media(max-width:900px){.hero-copy h1{font-size:33px}.hero-copy{min-height:0;padding:22px}[data-testid="stMainBlockContainer"]{padding:1rem 1rem 3rem}}
 </style>
 ''', unsafe_allow_html=True)
 
@@ -287,7 +301,7 @@ with st.sidebar:
             st.rerun()
     st.caption(f'Current view: {VIEWS[st.session_state.view]}')
     st.divider()
-    if st.button('＋ New Conversation',**FULL_WIDTH):
+    if st.button('＋ New Conversation', key='new_conversation', **FULL_WIDTH):
         st.session_state.messages=[];st.session_state.pending=None;st.session_state.session_id=None;st.rerun()
     transcript='\n\n'.join(f'{m["role"].upper()}: {m["content"]}' for m in st.session_state.messages)
     st.download_button('↓ Export Chat',transcript or 'No conversation yet','autoguide_chat.txt','text/plain',**FULL_WIDTH)
@@ -324,7 +338,7 @@ def render_chat():
     with hero_l:
         st.markdown('''<div class="hero-copy"><div class="eyebrow">DRIVE SMARTER. STAY SAFER.</div>
 <h1>Auto<span>Guide</span> AI</h1><p>Ask about vehicle safety, recalls, history, specifications and fuel economy. Answers link to the available sources.</p>
-<p>Safety Features &nbsp; • &nbsp; Recalls &nbsp; • &nbsp; Ratings</p></div>''',unsafe_allow_html=True)
+<p class="pill-row">Safety Features &nbsp; • &nbsp; Recalls &nbsp; • &nbsp; Ratings</p></div>''',unsafe_allow_html=True)
     with hero_r:
         st.image(str(ROOT/'assets'/'vehicle_hero.jpg'),**FULL_WIDTH)
 
