@@ -1,0 +1,10 @@
+{
+  "doc_id": "FIX-AEB",
+  "source_url": "https://www.nhtsa.gov/test-fixture/automatic-emergency-braking",
+  "title": "TEST FIXTURE: Automatic Emergency Braking",
+  "text": "## Automatic Emergency Braking\nAutomatic emergency braking uses forward-facing sensors such as cameras or radar to detect a vehicle ahead. If the driver does not respond to a forward collision warning, the system can apply the brakes automatically to avoid a crash or reduce its severity.\n## Limitations\nSensors can be affected by weather, dirt and lighting. Drivers must stay attentive and keep their hands on the wheel.",
+  "page_type": "html",
+  "source_type": "nhtsa_web",
+  "content_hash": null,
+  "crawl_timestamp": "2026-10-10T00:00:00Z"
+}

@@ -1,0 +1,45 @@
+# Full stack: Postgres + API + Streamlit UI.
+#   docker compose up --build
+#   docker compose run --rm api python ingest.py all     # first time: load data + build index
+# UI  -> http://localhost:8501     API docs -> http://localhost:8000/docs
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: autoguide
+      POSTGRES_PASSWORD: autoguide
+      POSTGRES_DB: autoguide
+    volumes: [pgdata:/var/lib/postgresql/data]
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoguide"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://autoguide:autoguide@db:5432/autoguide
+      CHROMA_DB_PATH: /app/data/chroma_db
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - hf-cache:/root/.cache/huggingface
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+
+  ui:
+    build: .
+    env_file: .env
+    environment:
+      AUTOGUIDE_API_URL: http://api:8000
+      DATABASE_URL: postgresql+psycopg://autoguide:autoguide@db:5432/autoguide
+    command: ["streamlit", "run", "app.py", "--server.address=0.0.0.0", "--server.port=8501"]
+    ports: ["8501:8501"]
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  hf-cache:

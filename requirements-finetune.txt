@@ -1,0 +1,8 @@
+# Only needed to TRAIN the clarifier NLU (finetune/train_nlu.py) or to run NLU_BACKEND=hf.
+# Install on a laptop or Google Colab:  pip install -r requirements-finetune.txt
+-r requirements.txt
+torch>=2.2
+transformers>=4.46,<6
+datasets>=2.19,<5
+accelerate>=0.30
+seqeval>=1.2.2

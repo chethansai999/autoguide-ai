@@ -1,0 +1,16 @@
+{
+  "_comment": "AutoGuide.com crawl scope (ADR-008). URLs come from the sitemaps listed in robots.txt; a URL is fetched only if its path contains one of include_keywords and matches none of exclude_patterns. Edit this file to widen or narrow the corpus.",
+  "delay_seconds": 1.0,
+  "max_sitemaps": 200,
+  "include_keywords": [
+    "safety", "safest", "recall", "crash", "airbag", "air-bag", "brake", "braking", "aeb",
+    "collision", "blind-spot", "lane-", "lane-keep", "lane-departure", "cruise-control", "adas",
+    "driver-assist", "driver-aid", "iihs", "nhtsa", "rollover", "stability-control", "traction",
+    "tire", "tyre", "child-seat", "car-seat", "booster", "seat-belt", "seatbelt", "headlight",
+    "top-safety-pick", "warning", "defect", "investigation", "autopilot", "self-driving",
+    "pedestrian", "rear-camera", "backup-camera", "parking-sensor", "drowsy", "distracted"
+  ],
+  "exclude_patterns": ["/tag/", "/author/", "/page/\\d+", "/video", "/gallery", "/photos?/"],
+  "seed_urls": [],
+  "extra_sitemaps": []
+}

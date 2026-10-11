@@ -1,0 +1,10 @@
+{
+  "description": "Reviewed seed list (ADR-010). No URLs are collected until crawl-web is explicitly run with a real contact email. Add EPA vehicle IDs only after checking make, model, year and variant on that page.",
+  "pages": [
+    {"source": "wikipedia", "url": "https://en.wikipedia.org/wiki/Toyota_Camry", "vehicle": {"make": "TOYOTA", "model": "CAMRY"}, "purpose": "Model history; year-specific specifications require a separately scoped source."},
+    {"source": "wikipedia", "url": "https://en.wikipedia.org/wiki/Honda_Civic", "vehicle": {"make": "HONDA", "model": "CIVIC"}, "purpose": "Model history and overview."},
+    {"source": "wikipedia", "url": "https://en.wikipedia.org/wiki/Ford_Mustang", "vehicle": {"make": "FORD", "model": "MUSTANG"}, "purpose": "Model history and overview."},
+    {"source": "fueleconomy", "url": "https://www.fueleconomy.gov/feg/atv.shtml", "purpose": "General fuel and vehicle technology guide; live availability unverified."},
+    {"source": "fueleconomy", "url": "https://www.fueleconomy.gov/feg/tech_p.shtml", "purpose": "General fuel efficiency technology guide; live availability unverified."}
+  ]
+}

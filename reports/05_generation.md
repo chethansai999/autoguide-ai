@@ -1,0 +1,20 @@
+# 05: Generation
+
+Owner: WP-05. Measured generation results go here (DEV split only; no mock numbers).
+
+## Local smoke check — October 10, 2026
+
+Reproduction: start the API/UI using README's local-testing commands, inspect `/ready`, and ask the sample questions there. This was an ad hoc smoke check against the configured real Gemini provider, not an evaluation on either the DEV or held-out TEST split. No held-out questions were read, and no mock answer-quality numbers are reported.
+
+- The local store contained 17,313 vehicle rows and 114 fixed chunks from five supplied reference PDFs. AutoGuide, Wikipedia and FuelEconomy HTML collections were empty.
+- Real Gemini responses cited the loaded NHTSA record for the 2020 Toyota Camry rating, correctly described backup-camera availability as unreported in that record, and cited the supplied IIHS small-overlap crash protocol. These checks establish individual working paths, not corpus-wide factual accuracy.
+- Missing vehicle details produced clarification; empty website scopes produced `no_evidence`; forecasts and input-injection attempts were refused. Browser feedback displayed “Feedback saved. Thank you.”
+- NHTSA recall evidence was found, but Gemini returned HTTP 429 quota errors during recall generation. Later provider calls also returned 429. Live generation therefore remains externally limited; quota errors are not disguised as connection failures or mock successes.
+- Testing overlapping UI/API requests exposed SQLite writer locking during a slow new-chat turn. The orchestrator now loads/detaches state before retrieval/generation and saves session/messages/trace atomically afterward. Recall caching finishes independently before answer generation. Regression checks cover another caller saving during generation for both new and existing conversations.
+- Verification: `.venv/bin/python -m pytest -q` → **182 passed, 2 xfailed**. The expected failures remain WP-03 structure chunking. A post-fix live overlap test saved a separate greeting in 0.01 seconds while the slow call completed with a provider quota error, without a database-lock exception. This timing is an observed smoke check, not a throughput benchmark.
+- Browser review covered desktop/tablet/mobile viewports. Responsive topic cards still become too narrow on tablet with the sidebar open; the mobile sidebar needs closing to see the content. No committed screenshot baseline exists, so visual regression is inconclusive. Basic DOM checks also found missing image alternatives/landmarks; this was not a complete accessibility audit.
+
+## Prompt change log
+
+- **2026-10-10, ADR-009:** The system prompt now lists IIHS crash-test protocols and rating guidelines as an evidence source. New rule 12: name the organisation behind each fact (NHTSA stars vs IIHS good/acceptable/marginal/poor), and say when an IIHS vehicle rating isn't in the data. Re-run the DEV evaluation before reporting generation numbers.
+- **2026-10-10, WP-11 / ADR-010:** Added Wikipedia vehicle articles and FuelEconomy.gov to the evidence scope. Rules 13–15 require version/year/market-specific specification claims, distinct MPG/MPGe and city/highway/combined labels, official NHTSA evidence for NHTSA ratings/recalls, and continued refusal of prices, repairs and insurance. Rule 12 and all existing guards remain. Wikipedia attribution is returned separately in typed citations and rendered with contributor/history/license/modification information. Offline integration checks pass; no real-provider DEV quality evaluation or training run was performed, and no mock quality numbers are reported.

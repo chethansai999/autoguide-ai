@@ -1,0 +1,10 @@
+{
+  "doc_id": "FIX-ABS",
+  "source_url": "https://www.nhtsa.gov/test-fixture/abs-esc",
+  "title": "TEST FIXTURE: Anti-lock Brakes and Electronic Stability Control",
+  "text": "## Anti-lock Braking System\nAn anti-lock braking system keeps the wheels from locking during hard braking so the driver can keep steering control.\n## Electronic Stability Control\nElectronic stability control detects loss of steering control and brakes individual wheels to help keep the vehicle headed where the driver intends. ABS helps when braking hard; stability control helps during skids and sharp turns.",
+  "page_type": "html",
+  "source_type": "nhtsa_web",
+  "content_hash": null,
+  "crawl_timestamp": "2026-10-10T00:00:00Z"
+}

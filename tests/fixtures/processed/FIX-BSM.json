@@ -1,0 +1,10 @@
+{
+  "doc_id": "FIX-BSM",
+  "source_url": "https://www.nhtsa.gov/test-fixture/blind-spot",
+  "title": "TEST FIXTURE: Blind Spot Detection",
+  "text": "## Blind Spot Detection\nBlind spot detection uses sensors to watch the areas beside and behind the vehicle that mirrors may not show. It alerts the driver with a light or sound when another vehicle is in the blind spot. It does not replace checking mirrors and looking over your shoulder.",
+  "page_type": "html",
+  "source_type": "nhtsa_web",
+  "content_hash": null,
+  "crawl_timestamp": "2026-10-10T00:00:00Z"
+}
