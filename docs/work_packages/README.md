@@ -15,5 +15,6 @@ Each work package (WP) is a self-contained brief that a teammate, or a coding ag
 | [WP-09](WP-09-evaluation.md) | Golden set, B0–B3, statistics, failure analysis | Sai Krishna (Evaluation) | P1 | 05, 06 | 🟡 harness done; questions missing |
 | [WP-10](WP-10-api-ui-deploy.md) | API, UI integration, Docker, README | Asad (PM) + Soujanya | P0/P3 | — | 🟢 scaffolded |
 | [WP-11](WP-11-vehicle-web-sources.md) | Curated Wikipedia/FuelEconomy integration | Owner-requested cross-package feature | P0 | 02, 04, 05, 06, 07, 10 | 🟡 offline implementation verified; live collection skipped |
+| [WP-12](WP-12-local-generation.md) | Optional Apple Silicon local generation | Owner-requested provider integration | P0 | 06, 10 | 🟢 offline checks and real local smoke verified |
 
 Status key: 🟢 working code exists and needs extending or tuning · 🟡 partly there · 🔴 blocked.

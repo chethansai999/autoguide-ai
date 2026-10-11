@@ -21,7 +21,7 @@ st.set_page_config(page_title='AutoGuide AI | Safety Intelligence', page_icon='ð
 _SETTINGS = get_settings()
 _PROVIDER = _SETTINGS.resolved_llm_provider()
 DEMO = _PROVIDER == 'mock'
-MODEL = {'openai': _SETTINGS.openai_model, 'anthropic': _SETTINGS.anthropic_model, 'gemini': _SETTINGS.gemini_model}.get(_PROVIDER, 'mock (no API key)')
+MODEL = {'openai': _SETTINGS.openai_model, 'anthropic': _SETTINGS.anthropic_model, 'gemini': _SETTINGS.gemini_model, 'local': _SETTINGS.local_model}.get(_PROVIDER, 'mock (no API key)')
 try:
     _STATUS = readiness()
     _PROVIDER = _STATUS['llm_provider']
@@ -115,7 +115,11 @@ with st.sidebar:
         else:
             st.warning('Article library unavailable. General safety answers need the article index.')
         st.caption('Backend setup complete' if _STATUS['ready'] else 'Backend setup incomplete; vehicle lookups may still work.')
-        st.caption('External service availability has not been checked.')
+        if _PROVIDER == 'local':
+            st.caption('Answers run on this computer. No hosted generation credits required.')
+            st.caption('Live recall availability has not been checked.')
+        else:
+            st.caption('External service availability has not been checked.')
     else:
         st.warning('Backend status unavailable. Check the backend connection.')
     st.divider()

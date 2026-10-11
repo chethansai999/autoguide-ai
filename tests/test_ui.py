@@ -65,6 +65,21 @@ def test_ui_uses_remote_backend_status(loaded, monkeypatch):
     assert any("Article library unavailable" in w.value for w in app.warning)
 
 
+def test_ui_identifies_local_generation_without_demo_label(loaded, monkeypatch):
+    from api import client
+
+    monkeypatch.setattr(client, "readiness", lambda: {
+        "llm_provider": "local", "llm_model": "local-fixture", "vehicles_loaded": 7,
+        "checks": {"vector_index": False}, "ready": False,
+    })
+    app = AppTest.from_file("../app.py", default_timeout=60).run()
+    assert not app.exception
+    captions = [c.value for c in app.caption]
+    assert "Configured provider: local" in captions
+    assert "Answers run on this computer. No hosted generation credits required." in captions
+    assert not any("Mode: DEMO" in caption for caption in captions)
+
+
 def test_ui_displays_approved_web_sources_and_wikipedia_credit(loaded, monkeypatch):
     from api import client
 

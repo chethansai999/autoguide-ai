@@ -99,9 +99,16 @@ def inspect_readiness(service: ChatService) -> dict:
     check("vector_index", vectors_valid,
           f"The vector collection must match the chunk file; rebuild: python ingest.py index --strategy {settings.chunk_strategy}")
 
-    key = (getattr(settings, f"{provider}_api_key", None) or "").strip()
-    check("generation_configured", provider != "mock" and key not in PLACEHOLDER_KEYS,
-          "Configure a supported LLM provider and its API key in .env; mock output is for development only.")
+    if provider == "local":
+        from core.local_llm import model_artifacts_present
+
+        check("generation_configured", find_spec("mlx_lm") is not None
+              and model_artifacts_present(settings.local_model_path.expanduser()),
+              "Install requirements-local.txt on Apple Silicon and configure complete local weights in LOCAL_MODEL_PATH.")
+    else:
+        key = (getattr(settings, f"{provider}_api_key", None) or "").strip()
+        check("generation_configured", provider != "mock" and key not in PLACEHOLDER_KEYS,
+              "Configure a supported LLM provider and its API key in .env; mock output is for development only.")
     check("semantic_embeddings", settings.embedding_backend != "hashing",
           "Use sentence-transformers embeddings for a real deployment; hashing is for offline tests.")
 

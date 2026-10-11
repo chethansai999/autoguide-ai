@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     # "auto" -> openai if OPENAI_API_KEY is set, else anthropic if
     # ANTHROPIC_API_KEY is set, else gemini if GEMINI_API_KEY is set, else
     # mock (deterministic, offline).
-    llm_provider: Literal["auto", "openai", "anthropic", "gemini", "mock"] = "auto"
+    llm_provider: Literal["auto", "openai", "anthropic", "gemini", "local", "mock"] = "auto"
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
     anthropic_api_key: str | None = None
@@ -83,6 +83,10 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3.8-flash"
     gemini_api_base: str = "https://generativelanguage.googleapis.com/v1beta"
+    # Optional Apple Silicon inference. Local paths only; never download at request time.
+    local_model: str = "Llama-3.1-8B-Instruct (4-bit local)"
+    local_model_path: Path = ROOT / "data" / "models" / "llama-3.1-8b-4bit"
+    local_context_tokens: int = 8192  # prompt plus output; reject overflow, retain all evidence
     llm_temperature: float = 0.0
     llm_max_tokens: int = 700
     llm_timeout_s: float = 30.0

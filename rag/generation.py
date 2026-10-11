@@ -150,6 +150,22 @@ def extractive_answer(question: str, evidence: list[Evidence], note: str = "") -
     return " ".join([note, *lines]).strip()
 
 
+def unknown_feature_answer(question: str, evidence: list[Evidence]) -> str | None:
+    """Keep a missing structured value from becoming an invented yes/no claim."""
+    from structured.safercar import FEATURES
+
+    keys = [key for key in find_features(question) if key in FEATURES]
+    if not keys or not evidence or any(item.kind != "vehicle_record" for item in evidence):
+        return None
+    if not any(_facts(item.text).get(FEATURES[key][0], "").casefold() in {"not reported", "unknown"}
+               for item in evidence for key in keys):
+        return None
+    refs = " ".join(f"[{item.ref}]" for item in evidence[:3])
+    return (extractive_answer(question, evidence) +
+            " A field marked 'not reported' means availability is unknown; it does not establish "
+            f"that the feature is absent {refs}.")
+
+
 class GroundedGenerator:
     def __init__(self, llm: LLMClient | None = None, allow_fallback: bool | None = None):
         self._llm = llm
@@ -180,20 +196,25 @@ class GroundedGenerator:
             "answer, say that the available information is insufficient."
         )
         messages = [*history_messages(history), {"role": "user", "content": prompt}]
-        try:
-            result = self.llm.complete(SYSTEM_PROMPT, messages)
-        except Exception as error:
-            if not (self.allow_fallback and is_connection_error(error)):
-                raise
-            log.warning("LLM unreachable (%s); answering extractively from the evidence.", type(error).__name__)
-            started = time.perf_counter()
-            text = extractive_answer(question, evidence, note=LLM_UNREACHABLE_NOTE)
-            result = LLMResult(
-                text=text, provider="extractive-fallback", model="none",
-                latency_ms=(time.perf_counter() - started) * 1000, cost_usd=0.0,
-                fallback_reason=f"{type(error).__name__}: {' '.join(str(error).split())[:200]}",
-            )
-            flags.append(FALLBACK_FLAG)
+        unknown = unknown_feature_answer(question, evidence)
+        if unknown is not None:
+            result = LLMResult(text=unknown, provider="structured-data", model="none", cost_usd=0.0)
+            flags.append("unknown_feature_availability_preserved")
+        else:
+            try:
+                result = self.llm.complete(SYSTEM_PROMPT, messages)
+            except Exception as error:
+                if not (self.allow_fallback and is_connection_error(error)):
+                    raise
+                log.warning("LLM unreachable (%s); answering extractively from the evidence.", type(error).__name__)
+                started = time.perf_counter()
+                text = extractive_answer(question, evidence, note=LLM_UNREACHABLE_NOTE)
+                result = LLMResult(
+                    text=text, provider="extractive-fallback", model="none",
+                    latency_ms=(time.perf_counter() - started) * 1000, cost_usd=0.0,
+                    fallback_reason=f"{type(error).__name__}: {' '.join(str(error).split())[:200]}",
+                )
+                flags.append(FALLBACK_FLAG)
         text, trimmed = trim_long_quotes(result.text, [e.text for e in evidence])
         if trimmed:
             flags.append("quote_trimmed_to_25_words")

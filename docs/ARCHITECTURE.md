@@ -60,11 +60,13 @@ flowchart LR
     rag --> chroma[(ChromaDB<br/>per-strategy collections)]
     rag --> chunks[(data/chunks/*.jsonl<br/>BM25 built at start)]
     svc --> recalls[NHTSA Recalls API<br/>+ cache]
-    gen --> llm{{LLM provider<br/>OpenAI / Anthropic / mock}}
+    gen --> llm{{LLM provider<br/>OpenAI / Anthropic / Gemini / local MLX / mock}}
     nlu -. hf .-> model[(models/clarifier<br/>fine-tuned DistilBERT)]
 ```
 
 **Design rule: one core, thin adapters.** All behaviour lives in `ChatService.handle(ChatRequest) -> ChatResponse`. The UI, the HTTP API and the evaluation runner are thin callers of that one method, so a fix lands everywhere at once and evaluation measures exactly what users get.
+
+WP-12 adds optional local MLX generation on Apple Silicon through the same `LLMClient` interface. It loads existing quantized weights lazily, serializes model access and reuses one model per path per process. With local generation, set `AUTOGUIDE_API_URL` so Streamlit shares the API's model instead of loading another copy. Readiness inspects artifacts/runtime availability without loading weights. Oversized prompts fail explicitly; evidence is never silently truncated. Model quantization is not fine-tuning on the corpus.
 
 ## 4. Offline pipeline (ingestion → index)
 
@@ -167,6 +169,7 @@ Conversation state and history are loaded in a short read transaction, then deta
 | `evaluation/` | golden set, metrics, B0–B3 runs, statistics | WP-09 |
 | `api/`, `app.py`, `db/`, Docker | HTTP API, UI integration, persistence, deployment | WP-10 |
 | Curated web-source integration across ingestion, retrieval, NLU and UI | source provenance, scope, attribution and offline integration | WP-11 (explicit cross-package integration) |
+| `core/local_llm.py`, provider configuration, readiness and UI | optional local MLX inference and unknown-feature grounding | WP-12 |
 
 ## 7. Data stores
 

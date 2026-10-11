@@ -40,6 +40,36 @@ Use the activated virtual environment for every command. If the system Python sa
 
 `.env` is git-ignored. Never paste a key into code, GitHub, Slack or a group chat. Set a monthly spending limit on the key in the OpenAI dashboard.
 
+## Local generation on Apple Silicon (optional)
+
+Hosted API authentication does not guarantee available credits. `LLM_PROVIDER=local` uses existing MLX weights on your Mac and needs no generation API key. Install the optional runtime and convert a model you already have permission to use:
+
+```bash
+pip install -r requirements-local.txt
+# Replace /absolute/path/to/cached/model with your existing model directory.
+# Offline flags prevent downloading model files during conversion.
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m mlx_lm convert \
+  --hf-path /absolute/path/to/cached/model \
+  --mlx-path data/models/llama-3.1-8b-4bit -q --q-bits 4 --q-group-size 64
+```
+
+Set these values in your ignored `.env` and restart both servers:
+
+```dotenv
+LLM_PROVIDER=local
+LOCAL_MODEL=Llama-3.1-8B-Instruct (4-bit local)
+LOCAL_MODEL_PATH=data/models/llama-3.1-8b-4bit
+LOCAL_CONTEXT_TOKENS=8192
+LLM_MAX_TOKENS=180
+LLM_TEMPERATURE=0
+NLU_BACKEND=rules
+AUTOGUIDE_API_URL=http://127.0.0.1:8000
+```
+
+Run the API and UI using the commands below under "Local testing and sample questions." HTTP mode shares one API model between UI requests. The first answer loads model weights; later answers reuse them. Missing local artifacts fail clearly without downloading a model. Oversized prompts fail rather than dropping evidence. `/ready` checks runtime/files, so send a real chat request to verify inference. Model weights and credentials remain ignored by Git; cloning this repository does not include them. This provider preserves citation/quote/refusal guards and does not fine-tune the generation model on your car data.
+
+**Local smoke check:** the cached Llama 3.1 8B model was converted to a roughly 4.2 GiB 4-bit MLX model. A cited 2020 Camry rating answer took 11.99 seconds after API restart and 4.00 seconds on the next request. A longer IIHS protocol question took 18.78 seconds in the initial run. These individual timings are not a benchmark or answer-quality evaluation. Unknown feature availability is rendered directly from the CSV: "not reported" remains unknown, never a claim that the feature is absent. That check took 0.26 seconds and records no model call. See `reports/05_generation.md` for reproduction and remaining validation.
+
 ## Build the document index
 
 General questions like "How does AEB work?" need AutoGuide.com safety articles to be crawled and indexed. Set `CRAWLER_CONTACT_EMAIL` in `.env` first.

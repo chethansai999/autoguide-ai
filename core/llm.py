@@ -9,6 +9,7 @@ for the cost-per-query metric.
     LLM_PROVIDER=openai    OPENAI_API_KEY=...  OPENAI_MODEL=gpt-4o-mini
     LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=... ANTHROPIC_MODEL=...
     LLM_PROVIDER=gemini    GEMINI_API_KEY=...    GEMINI_MODEL=gemini-3.8-flash
+    LLM_PROVIDER=local     # optional MLX runtime, existing local model, no API key
     LLM_PROVIDER=mock      # deterministic extractive answers, no network
 """
 
@@ -362,6 +363,10 @@ def build_llm(settings: Settings | None = None) -> LLMClient:
         return AnthropicClient(settings)
     if provider == "gemini":
         return GeminiClient(settings)
+    if provider == "local":
+        from core.local_llm import LocalMLXClient
+
+        return LocalMLXClient(settings)
     log.warning("LLM provider is 'mock': answers are extractive placeholders.")
     return MockLLM()
 

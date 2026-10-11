@@ -1,0 +1,2 @@
+# Optional local generation on Apple Silicon; install runtime requirements first.
+mlx-lm==0.32.0; sys_platform == "darwin" and platform_machine == "arm64"
